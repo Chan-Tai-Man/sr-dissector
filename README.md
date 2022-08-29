@@ -1,4 +1,4 @@
-My first attempt of making Wireshark dissector. This one is for Silkroad Online Protocol. Incomplete spaghetti.
+Pierwsza próba wykonania analizera prodokołu sieciowego do Wireshark-a na przykładzie protokołu gry MMORPG Silkroad Online. Kiedyś pewnie do tego wrócę i zrobię analizer w C :-P
 
 ## Usage
 ```

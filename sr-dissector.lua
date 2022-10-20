@@ -17,6 +17,10 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 	local security = buffer(4,2)
 	
 	local is_encrypted = buffer(1,1):bitfield(0,1) == 1
+	if is_encrypted then
+		local size_encrypted = size:le_uint()
+		size = size_encrypted - 0x8000
+	end
 	
 	pinfo.cols.protocol = "Silkroad"
 	

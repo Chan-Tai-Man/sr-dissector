@@ -572,6 +572,8 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 
 		elseif opcode == 0xb574 then
 			opcodeDesc = "SERVER_BALOON_UP_RESPONSE"
+		else
+			opcodeDesc = "UNKNOWN"
 		end
 		pinfo.cols.info:append(" " .. opcodeDesc)
 	end

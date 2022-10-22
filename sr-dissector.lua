@@ -137,6 +137,9 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 		elseif opcode == 0x30b7 then
 			opcodeDesc = "SERVER_STALL_PLAYERUPDATE"
 
+		elseif opcode == 0x30cf then
+			opcodeDesc = "SERVER_QUEST_PROGRESS"
+
 		elseif opcode == 0x30d0 then
 			opcodeDesc = "SERVER_SETSPEED"
 		-- elseif opcode == 0x30d1 then

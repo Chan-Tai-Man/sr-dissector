@@ -1,5 +1,5 @@
-local SERVER_GLOBAL_IDENTIFICATION = require "silkroad\\SERVER_GLOBAL_IDENTIFICATION";
-local SERVER_GLOBAL_HANDSHAKE = require "silkroad\\SERVER_GLOBAL_HANDSHAKE";
+local SERVER_GLOBAL_IDENTIFICATION = require "silkroad/SERVER_GLOBAL_IDENTIFICATION";
+local SERVER_GLOBAL_HANDSHAKE = require "silkroad/SERVER_GLOBAL_HANDSHAKE";
 
 getmetatable('').__call = string.sub
 

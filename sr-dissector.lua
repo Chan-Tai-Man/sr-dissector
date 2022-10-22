@@ -185,6 +185,9 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 		elseif opcode == 0x34be then
 			opcodeDesc = "AGENT_GAME_SERVERTIME"
 
+		elseif opcode == 0x34c6 then
+			opcodeDesc = "CLIENT_FINISH_LOADING"
+
 		elseif opcode == 0x34d2 then
 			opcodeDesc = "The request for the party denied."
 

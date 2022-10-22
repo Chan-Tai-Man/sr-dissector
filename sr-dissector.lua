@@ -17,9 +17,8 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 
 	local pklen = buffer:len()
 	local current_offset = 0
-	local info = ""
 	while current_offset < pklen do
-		local bytes_consumed, pkt_info = dissect_single_packet(buffer, tree, current_offset)
+		local bytes_consumed = dissect_single_packet(buffer, pinfo, tree, current_offset)
 		if bytes_consumed < 0 then
 			pinfo.desegment_offset = current_offset
 			pinfo.desegment_len = -bytes_consumed
@@ -27,28 +26,22 @@ function silkroad_protocol.dissector(buffer, pinfo, tree)
 		elseif bytes_consumed == 0 then
 			return 0
 		else
-			if info:len() == 0 then
-				info = pkt_info
-			else
-				info = info .. " - " .. pkt_info
-			end
 			current_offset = current_offset + bytes_consumed
-			pinfo.cols.info:set(info)
 		end
 	end
 
 	return current_offset
 end
 
-function dissect_single_packet(buffer, tree, offset)
+function dissect_single_packet(buffer, pinfo, tree, offset)
 	local remaining = buffer:len() - offset
 	if remaining < 6 then
-		-- if we have less than 6 bytes remaining, we say we need the different of bytes
-		-- before we can continue. We negate this to differentiate between success and failure.
-		return -DESEGMENT_ONE_MORE_SEGMENT, ""
+		-- If we have less than 6 bytes remaining, we know the packet isn't complete.
+		-- Thus we _always_ need one more segment. We could be more accurate here if
+		-- we wanted to, but this is good enough.
+		return -DESEGMENT_ONE_MORE_SEGMENT
 	end
 
-	local info = ""
 	local size = buffer(offset,2)
 	local total_size = size:le_uint() + 6
 	local opcode = buffer(offset + 2,2)
@@ -62,7 +55,7 @@ function dissect_single_packet(buffer, tree, offset)
 	end
 
 	if remaining < total_size then
-		return -(total_size - remaining), ""
+		return -(total_size - remaining)
 	end
 	
 	local TREE_MAIN = tree:add(silkroad_protocol, buffer(offset, total_size), "Silkroad Protocol")
@@ -73,12 +66,17 @@ function dissect_single_packet(buffer, tree, offset)
 	SUBTREE_HEADER:add_le(header.security, security);
 	
 	-- Put the opcode inside "Info" column.
-	info = "0x" .. string.upper(tostring(opcode)(3,4)) .. string.upper(tostring(opcode)(0,2));
+	local info = "0x" .. string.upper(tostring(opcode)(3,4)) .. string.upper(tostring(opcode)(0,2));
+	if string.find(tostring(pinfo.cols.info), "^0x") == nil then
+		pinfo.cols.info:set(info)
+	else 
+		pinfo.cols.info:append(" - " .. info)
+	end
 	
 	local SUBTREE_DATA = TREE_MAIN:add(silkroad_protocol, buffer(offset + 6, total_size - 6), "Packet Data")
 	
 	if is_encrypted then
-		info = info .. " ENCRYPTED"
+		pinfo.cols.info:append(" ENCRYPTED")
 	else
 		local opcode = buffer(offset + 2,2):le_uint()
 
@@ -110,10 +108,10 @@ function dissect_single_packet(buffer, tree, offset)
 		else
 			opcodeDesc = OPCODES.get_description(opcode)
 		end
-		info = info .. " " .. opcodeDesc
+		pinfo.cols.info:append(" " .. opcodeDesc)
 	end
 
-	return total_size, info
+	return total_size
 end
 
 function get_encrypted_aligned_data_size(size)
